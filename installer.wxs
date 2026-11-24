@@ -1,0 +1,163 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="990BC64E-0CA4-464D-B5B1-AA8A54FC3118"
+           Name="GXUST电费助手"
+           Language="2052"
+           Version="1.0.0.0"
+           Manufacturer="smg123"
+           Codepage="65001"
+           UpgradeCode="D8C13CD8-7E70-4461-AC3D-35C15C53CADD">
+
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perUser" />
+    <MajorUpgrade DowngradeErrorMessage="已安装更新版本的 GXUST电费助手，请先卸载后再安装。" />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon" SourceFile="assets\app.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+    <Property Id="ARPHELPLINK" Value="https://wsjgg02.gxust.edu.cn/Mobile/index.html" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <Property Id="WixShellExecTarget" Value="[INSTALLFOLDER]GXUSTPower.exe" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="立即运行 GXUST电费助手" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+    <Property Id="DESKTOP_SHORTCUT" Value="1" />
+
+    <WixVariable Id="WixUILicenseRtf" Value="assets\license.rtf" />
+    <UIRef Id="WixUI_InstallDir" />
+
+    <CustomAction Id="LaunchApp" BinaryKey="WixCA" DllEntry="WixShellExec"
+                  Impersonate="yes" />
+    <CustomAction Id="AskKeepUserData" Directory="INSTALLFOLDER"
+                  ExeCommand="&quot;[INSTALLFOLDER]GXUSTPower.exe&quot; --uninstall-data-prompt"
+                  Execute="immediate" Impersonate="yes" Return="ignore" />
+    <InstallExecuteSequence>
+      <Custom Action="AskKeepUserData" Before="RemoveFiles">REMOVE="ALL" AND NOT UPGRADINGPRODUCTCODE AND UILevel&gt;=3</Custom>
+    </InstallExecuteSequence>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="LocalAppDataFolder">
+        <Directory Id="ProgramsDir" Name="Programs">
+          <Directory Id="INSTALLFOLDER" Name="GXUSTPower" />
+        </Directory>
+      </Directory>
+
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="AppMenuDir" Name="GXUST电费助手">
+          <Component Id="StartMenuShortcut" Guid="BB769D32-138A-4297-B6D9-4F61EA3C4405" Win64="yes">
+            <Shortcut Id="AppStartMenuShortcut"
+                      Name="GXUST电费助手"
+                      Description="查看宿舍剩余电量"
+                      Target="[INSTALLFOLDER]GXUSTPower.exe"
+                      WorkingDirectory="INSTALLFOLDER"
+                      Icon="AppIcon" />
+            <RemoveFolder Id="RemoveAppMenuDir" On="uninstall" />
+            <RegistryValue Root="HKCU" Key="Software\GXUSTPower" Name="StartMenuShortcut"
+                           Type="integer" Value="1" KeyPath="yes" />
+            <RemoveRegistryValue Root="HKCU"
+                                 Key="Software\Microsoft\Windows\CurrentVersion\Run"
+                                 Name="DormPower" />
+          </Component>
+          <Component Id="UninstallShortcut" Guid="B2E4D3B7-0D5A-4B5B-9D6E-1C2E8A7F6A11" Win64="yes">
+            <Shortcut Id="AppUninstallShortcut"
+                      Name="卸载 GXUST电费助手"
+                      Description="卸载 GXUST电费助手"
+                      Target="[INSTALLFOLDER]uninstall.exe"
+                      WorkingDirectory="INSTALLFOLDER"
+                      Icon="AppIcon" />
+            <RegistryValue Root="HKCU" Key="Software\GXUSTPower" Name="UninstallShortcut"
+                           Type="integer" Value="1" KeyPath="yes" />
+          </Component>
+        </Directory>
+      </Directory>
+
+      <Directory Id="DesktopFolder">
+        <Component Id="DesktopShortcut" Guid="AA1A4DB4-A29E-401A-A239-6D536CC9EC92" Win64="yes">
+          <Shortcut Id="AppDesktopShortcut"
+                    Name="GXUST电费助手"
+                    Description="查看宿舍剩余电量"
+                    Target="[INSTALLFOLDER]GXUSTPower.exe"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="AppIcon" />
+          <RegistryValue Root="HKCU" Key="Software\GXUSTPower" Name="DesktopShortcut"
+                         Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </Directory>
+
+    <Feature Id="MainFeature" Title="GXUST电费助手" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="UninstallShortcut" />
+    </Feature>
+
+    <Feature Id="DesktopShortcutFeature" Title="桌面快捷方式" Level="1" Display="hidden">
+      <ComponentRef Id="DesktopShortcut" />
+      <Condition Level="0">DESKTOP_SHORTCUT &lt;&gt; 1</Condition>
+    </Feature>
+
+    <UI>
+      <Dialog Id="FreeSoftwareDlg" Width="370" Height="270"
+              Title="[ProductName] 安装说明" NoMinimize="yes">
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="340" Height="16"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="{\WixUI_Font_Title}重要声明" />
+        <Control Id="Body" Type="Text" X="25" Y="32" Width="320" Height="150"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="本软件完全免费开源。如需付费，或来自来路不明的渠道下载，则软件遭到了修改，请立即删除！软件仅在 QQ 频道、GitHub 上发布。作者 QQ：3104666011　GitHub：@smg123233。" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
+                 Default="yes" Text="下一步">
+          <Publish Event="EndDialog" Value="Return">1</Publish>
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" Text="取消">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+      </Dialog>
+
+      <Dialog Id="InstallDirOptionsDlg" Width="370" Height="270"
+              Title="[ProductName] 选择安装位置" NoMinimize="yes">
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="340" Height="16"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="{\WixUI_Font_Title}选择安装位置" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="320" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="选择安装位置，并确认是否创建桌面快捷方式。" />
+        <Control Id="FolderLabel" Type="Text" X="20" Y="48" Width="320" Height="16"
+                 NoPrefix="yes" Text="安装到：" />
+        <Control Id="Folder" Type="PathEdit" X="20" Y="66" Width="320" Height="18"
+                 Property="WIXUI_INSTALLDIR" Indirect="yes" />
+        <Control Id="ChangeFolder" Type="PushButton" X="20" Y="88" Width="80"
+                 Height="17" Text="更改位置..." />
+        <Control Id="DesktopCheckBox" Type="CheckBox" X="20" Y="122" Width="320"
+                 Height="40" Property="DESKTOP_SHORTCUT" CheckBoxValue="1"
+                 Text="创建桌面快捷方式（推荐）" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
+                 Text="上一步">
+          <Publish Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
+                 Default="yes" Text="下一步">
+          <Publish Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+          <Publish Event="DoAction" Value="WixUIValidatePath" Order="2">NOT WIXUI_DONTVALIDATEPATH</Publish>
+          <Publish Event="SpawnDialog" Value="InvalidDirDlg" Order="3"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
+          <Publish Event="NewDialog" Value="VerifyReadyDlg" Order="4">WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"</Publish>
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" Text="取消">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+      </Dialog>
+
+      <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="InstallDirOptionsDlg" Order="2">LicenseAccepted = "1"</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="InstallDirOptionsDlg" Order="3">NOT Installed</Publish>
+      <Publish Dialog="InstallDirOptionsDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+      <Publish Dialog="InstallDirOptionsDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchApp">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1</Publish>
+    </UI>
+
+    <InstallUISequence>
+      <Show Dialog="FreeSoftwareDlg" Sequence="1293">NOT Installed</Show>
+    </InstallUISequence>
+  </Product>
+</Wix>
