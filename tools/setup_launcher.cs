@@ -9,8 +9,8 @@ using System.Windows.Forms;
 [assembly: AssemblyCompany("smg123")]
 [assembly: AssemblyProduct("GXUST电费助手")]
 [assembly: AssemblyCopyright("smg123")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]
+[assembly: AssemblyVersion("1.0.1.0")]
 
 internal static class SetupLauncher
 {

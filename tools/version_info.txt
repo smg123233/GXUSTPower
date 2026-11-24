@@ -1,7 +1,7 @@
 VSVersionInfo(
   ffi=FixedFileInfo(
-    filevers=(1, 0, 0, 0),
-    prodvers=(1, 0, 0, 0),
+    filevers=(1, 0, 1, 0),
+    prodvers=(1, 0, 1, 0),
     mask=0x3f,
     flags=0x0,
     OS=0x40004,
@@ -14,12 +14,12 @@ VSVersionInfo(
       StringTable('080404b0', [
         StringStruct('CompanyName', 'smg123'),
         StringStruct('FileDescription', 'GXUST电费助手'),
-        StringStruct('FileVersion', '1.0.0.0'),
+        StringStruct('FileVersion', '1.0.1.0'),
         StringStruct('InternalName', 'GXUSTPower'),
         StringStruct('LegalCopyright', 'smg123'),
         StringStruct('OriginalFilename', 'GXUSTPower.exe'),
         StringStruct('ProductName', 'GXUST电费助手'),
-        StringStruct('ProductVersion', '1.0.0.0')
+        StringStruct('ProductVersion', '1.0.1.0')
       ])
     ]),
     VarFileInfo([VarStruct('Translation', [2052, 1200])])

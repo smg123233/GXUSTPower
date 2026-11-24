@@ -570,19 +570,24 @@ class App:
         if self._usage_mode == "balance":
             self._draw_balance_line(canvas, data, width, height)
             return
+        rotate_labels = False
         if self._usage_mode == "day":
             series = stats.daily_series(data, now, days=30)
-            labels_every = 5
+            labels_every = 1
+            rotate_labels = True
             summary = self._usage_summary_day(series)
         elif self._usage_mode == "month":
             series = stats.monthly_series(data, now, months=12)
             labels_every = 1
             summary = self._usage_summary_series(series, "近 12 个月")
         else:
-            series = stats.yearly_series(data, now, years=5)
-            labels_every = 1
-            summary = self._usage_summary_series(series, "近 5 年")
-        self._draw_bars(canvas, series, width, height, labels_every)
+            series = stats.yearly_series(data, now, years=1)
+            year = time.localtime(now).tm_year
+            summary = self._usage_summary_series(series, f"{year} 年")
+            self._draw_year_summary(canvas, series, width, height)
+            self.usage_summary.configure(text=summary)
+            return
+        self._draw_bars(canvas, series, width, height, labels_every, rotate_labels)
         self.usage_summary.configure(text=summary)
 
     def _usage_summary_day(self, series: list[dict]) -> str:
@@ -595,19 +600,34 @@ class App:
                     f"近 7 天日均 {st['dailyAvg']:.2f} 度（预计可用仅供参考）")
         return f"近 30 天合计 {total:.2f} 度；累计满 7 天后才会给出预计可用（仅供参考）"
 
+    def _draw_year_summary(self, canvas: tk.Canvas, series: list[dict],
+                           width: int, height: int) -> None:
+        value = series[0]["value"] if series else 0.0
+        label = series[0]["label"] if series else f"{time.localtime().tm_year}年"
+        canvas.create_text(width / 2, height / 2 - 50, text=label,
+                           fill=TEXT, font=_font(30, True))
+        canvas.create_text(width / 2, height / 2 + 2, text="年度累计用电",
+                           fill=MUTED, font=_font(11))
+        canvas.create_text(width / 2, height / 2 + 42, text=f"{value:.2f} 度",
+                           fill=ACCENT, font=_font(24, True))
+        canvas.create_text(width / 2, height / 2 + 84,
+                           text="数据越久越完整，仅统计当前年份",
+                           fill="#5d6f95", font=_font(9))
+
     @staticmethod
     def _usage_summary_series(series: list[dict], label: str) -> str:
         total = sum(point["value"] for point in series)
         return f"{label}合计 {total:.2f} 度（数据越久越完整）"
 
     def _draw_bars(self, canvas: tk.Canvas, series: list[dict], width: int,
-                   height: int, labels_every: int) -> None:
+                   height: int, labels_every: int, rotate_labels: bool = False) -> None:
         values = [point["value"] for point in series]
         if not values or max(values) <= 0:
             canvas.create_text(width / 2, height / 2, text="还没有足够的用电数据",
                                fill=MUTED, font=_font(9))
             return
-        pad_left, pad_right, pad_top, pad_bottom = 40, 10, 24, 30
+        pad_left, pad_right, pad_top = 40, 10, 24
+        pad_bottom = 58 if rotate_labels else 30
         plot_w = max(10, width - pad_left - pad_right)
         plot_h = max(10, height - pad_top - pad_bottom)
         peak = max(values)
@@ -631,8 +651,13 @@ class App:
                 canvas.create_text(x0 + bar_w / 2, y0 - 6, text=f"{value:.1f}",
                                    fill=MUTED, font=_font(7))
             if index % labels_every == 0:
-                canvas.create_text(x0 + bar_w / 2, height - pad_bottom + 12,
-                                   text=point["label"], fill=MUTED, font=_font(7))
+                if rotate_labels:
+                    canvas.create_text(x0 + bar_w / 2, height - pad_bottom + 10,
+                                       text=point["label"], angle=90, anchor="ne",
+                                       fill=MUTED, font=_font(7))
+                else:
+                    canvas.create_text(x0 + bar_w / 2, height - pad_bottom + 12,
+                                       text=point["label"], fill=MUTED, font=_font(7))
 
     def _draw_balance_line(self, canvas: tk.Canvas, history: list[dict],
                            width: int, height: int) -> None:
@@ -645,7 +670,7 @@ class App:
             self.usage_summary.configure(text="余额曲线：最近 7 天")
             return
         self.usage_summary.configure(text="余额曲线：最近 7 天（阶梯上升表示充值）")
-        pad_left, pad_right, pad_top, pad_bottom = 44, 12, 16, 28
+        pad_left, pad_right, pad_top, pad_bottom = 44, 12, 16, 34
         xs = [p["ts"] for p in points]
         ys = [p["balance"] for p in points]
         min_x, max_x = min(xs), max(xs)
@@ -664,19 +689,42 @@ class App:
         def sy(value: float) -> float:
             return height - pad_bottom - (value - min_y) / (max_y - min_y or 1) * (height - pad_top - pad_bottom)
 
-        canvas.create_line(pad_left, height - pad_bottom, width - pad_right,
-                           height - pad_bottom, fill="#2a3a5f")
-        canvas.create_text(pad_left - 6, sy(max_y) + 4, text=f"{data_max:.2f}", anchor="e",
+        baseline = height - pad_bottom
+        for step in range(5):
+            ratio = step / 4
+            y = pad_top + ratio * (baseline - pad_top)
+            canvas.create_line(pad_left, y, width - pad_right, y, fill="#223252")
+        canvas.create_line(pad_left, baseline, width - pad_right, baseline, fill="#2a3a5f")
+        canvas.create_text(pad_left - 6, sy(data_max) + 4, text=f"{data_max:.2f}", anchor="e",
                            fill=MUTED, font=_font(8))
         if data_max - data_min >= 0.05:
-            canvas.create_text(pad_left - 6, sy(min_y) - 2, text=f"{data_min:.2f}", anchor="e",
+            canvas.create_text(pad_left - 6, sy(data_min) - 2, text=f"{data_min:.2f}", anchor="e",
                                fill=MUTED, font=_font(8))
         coords = []
         for point in points:
             coords.extend((sx(point["ts"]), sy(point["balance"])))
+        canvas.create_polygon(*coords, sx(points[-1]["ts"]), baseline,
+                              sx(points[0]["ts"]), baseline,
+                              fill="#16294a", outline="")
         canvas.create_line(*coords, fill=ACCENT, width=2)
-        canvas.create_oval(coords[-2] - 3, coords[-1] - 3, coords[-2] + 3, coords[-1] + 3,
-                           fill=TEXT, outline="")
+        every = max(1, len(points) // 18)
+        for index, point in enumerate(points):
+            if index % every and index != len(points) - 1:
+                continue
+            px, py = sx(point["ts"]), sy(point["balance"])
+            canvas.create_oval(px - 2, py - 2, px + 2, py + 2, fill=TEXT, outline="")
+        labels = [(min_x, "start"), ((min_x + max_x) / 2, "middle"), (max_x, "end")]
+        for value, position in labels:
+            x = sx(value)
+            if position == "start":
+                anchor = "w"
+            elif position == "end":
+                anchor = "e"
+            else:
+                anchor = "center"
+            canvas.create_text(x, height - pad_bottom + 16,
+                               text=time.strftime("%m-%d", time.localtime(value)),
+                               anchor=anchor, fill=MUTED, font=_font(8))
 
     # ------------------------------------------------------------------
     # 操作

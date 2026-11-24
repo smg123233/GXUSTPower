@@ -8,12 +8,12 @@ using System.Windows.Forms;
 [assembly: AssemblyCompany("smg123")]
 [assembly: AssemblyProduct("GXUST电费助手")]
 [assembly: AssemblyCopyright("smg123")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]
+[assembly: AssemblyVersion("1.0.1.0")]
 
 internal static class UninstallLauncher
 {
-    private const string ProductCode = "{990BC64E-0CA4-464D-B5B1-AA8A54FC3118}";
+    private const string ProductCode = "{108123BF-DC2C-4202-AE38-D255B16D1672}";
 
     [STAThread]
     private static void Main()

@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="990BC64E-0CA4-464D-B5B1-AA8A54FC3118"
+  <Product Id="108123BF-DC2C-4202-AE38-D255B16D1672"
            Name="GXUST电费助手"
            Language="2052"
-           Version="1.0.0.0"
+           Version="1.0.1.0"
            Manufacturer="smg123"
            Codepage="65001"
            UpgradeCode="D8C13CD8-7E70-4461-AC3D-35C15C53CADD">

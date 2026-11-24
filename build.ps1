@@ -3,13 +3,13 @@
   一键构建：PyInstaller 打 exe（onedir），WiX 打 MSI，并生成便携版 zip。
   产物：
     dist\GXUSTPower\GXUSTPower.exe            主程序（绿软目录）
-    dist\GXUSTPower-1.0.0-portable.zip       便携版压缩包
-    dist\GXUSTPower-1.0.0.msi                安装包（装到 %LOCALAPPDATA%\Programs\DormPower）
+    dist\GXUSTPower-1.0.1-portable.zip       便携版压缩包
+    dist\GXUSTPower-1.0.1.msi                安装包（装到 %LOCALAPPDATA%\Programs\DormPower）
 #>
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 
-$Version = '1.0.0'
+$Version = '1.0.1'
 $WixDir = Join-Path $PSScriptRoot 'build\tools\wix'
 $Candle = Join-Path $WixDir 'candle.exe'
 $Light = Join-Path $WixDir 'light.exe'
